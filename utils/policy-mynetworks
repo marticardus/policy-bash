@@ -1,0 +1,63 @@
+#!/bin/bash
+source /etc/policy-bash/policy-conf
+
+usage() {
+	echo "$(basename $0) -l | -a|-d -iIP [ -cCOMMENT ]"
+	echo -e "\t-l list ip address to relay"
+	echo -e "\t-a Add"
+	echo -e "\t-d Delete"
+	echo -e "\t-i IP"
+	exit
+}
+
+
+ARGS=$(getopt -o ladi:c:: -n $(basename $0) -- "$@")
+if [ $? != 0 ] ; then usage >&2 ; exit 1 ; fi
+eval set -- "$ARGS"
+while true ; do
+    case "$1" in
+	 	-l) ACTION=list; shift;;
+		-a) ACTION=add; shift;;
+		-d) ACTION=del; shift;;
+		-i) IP=$2; shift 2;;
+		-c) COMMENT=$2; shift 2;;
+		--) shift; break;;
+		*) usage;;
+	esac
+done
+
+
+test -z "$COMMENT" && COMMENT="Relay network"
+test -z "$ACTION" && ACTION=list
+
+list(){
+	QUERY="SELECT * FROM relay_networks"
+	$MYSQL "$QUERY"
+}
+add(){
+	test -z "$IP" && usage
+	LIST=$(list)
+	if [ $(echo "$LIST"|grep "$IP"|wc -l) -eq 0 ]; then
+		QUERY="INSERT INTO relay_networks (network,comment,active) VALUES ('$IP','$COMMENT',1)"
+		$MYSQL "$QUERY"
+	else
+		echo "network exists"
+		echo "$LIST"|grep "$IP"
+	fi
+}
+del(){
+	test -z "$IP" && usage
+	LIST=$(list)
+	if [ $(echo "$LIST"|grep "$IP"|wc -l) -gt 0 ]; then
+		QUERY="DELETE FROM relay_networks WHERE network='$IP'"
+		$MYSQL "$QUERY"
+	else
+		echo "network not exists"
+	fi
+}
+
+case "$ACTION" in
+	list) list;;
+	add) add;;
+	del) del;;
+esac
