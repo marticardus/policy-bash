@@ -1,0 +1,18 @@
+#!/bin/bash
+
+CLASSES=$(postconf -h smtpd_restriction_classes|sed 's/,/ /g')
+
+for C in $CLASSES; do
+	DC="$DC $C $C on"
+done
+
+DOMAIN=$(dialog --output-fd 1 --inputbox "Domain to set restrictions" 8 40)
+CS=$(dialog --output-fd 1 --title "smtpd_helo_restrictions" --checklist "Restriccions" 10 40 8\
+                $DC)
+
+CS=$(echo $CS|sed 's/ /,/g')
+clear
+
+echo "Insert classes $CS for domain $DOMAIN"
+
+# MYSQL INSERT

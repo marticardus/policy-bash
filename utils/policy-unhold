@@ -1,0 +1,15 @@
+SENDERS=$($MYPFLOG "SELECT sender FROM holdmails GROUP BY sender")
+
+for SENDER in $SENDERS; do
+	echo "Sender-> $SENDER"
+	$MYPFLOG "UPDATE holdretries SET retries=0 WHERE sender='$SENDER'"
+	QUEUE_IDS=$($MYPFLOG "SELECT queue_id FROM holdmails WHERE sender='$SENDER' LIMIT 2")
+	for QUEUE_ID in $QUEUE_IDS; do
+		echo "Queue_id -> $QUEUE_ID"
+		/usr/sbin/postsuper -H $QUEUE_ID
+		/usr/sbin/postqueue -i $QUEUE_ID
+		$MYPFLOG "DELETE FROM holdmails WHERE queue_id='$QUEUE_ID'"
+		$MYPFLOG "UPDATE holdretries SET retries=retries+1 WHERE sender='$SENDER'"
+	done
+done
+

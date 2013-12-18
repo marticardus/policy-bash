@@ -1,0 +1,10 @@
+MHOST=localhost
+MUSER=USER
+MPASSWD=PASSWD
+MBBDD=policy-bash
+MYSQL="mysql -h$MHOST -u$MUSER -p$MPASSWD $MBBDD -NB -e "
+POLICYDIR=/path/to/policy-bash
+POLICIESDIR=$POLICYDIR/policies
+POLICYUTILS=$POLICYDIR/utils
+
+source $POLICYDIR/policy-common

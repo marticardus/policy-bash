@@ -1,0 +1,5 @@
+user = USER
+password = PASSWORD
+hosts = HOST
+dbname = DBNAME
+query = SELECT login FROM relay_user_perms WHERE ( sender='%s' OR sender='%d' OR sender='ALL' ) AND active=1

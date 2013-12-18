@@ -1,0 +1,11 @@
+#IMPORTANT!
+smtpd_delay_reject = no
+
+smtpd_client_restrictions = check_policy_service unix:private/policy-common
+smtpd_helo_restrictions = check_policy_service unix:private/policy-common
+smtpd_sender_restrictions = check_policy_service unix:private/policy-common
+smtpd_recipient_restrictions = check_policy_service unix:private/policy-common
+smtpd_data_restrictions = check_policy_service unix:private/policy-common
+smtpd_end_of_data_restrictions = check_policy_service unix:private/policy-common
+smtpd_etrn_restrictions = check_policy_service unix:private/policy-common
+

@@ -1,0 +1,98 @@
+#!/bin/bash
+source /etc/policy-bash/policy-conf
+
+#ARGS=$(getopt -o ab:c:: --long a-long,b-long:,c-long:: -n 'example.bash' -- "$@")
+
+usage(){
+	echo "$(basename $0) -a|-l -sSENDER -rRECIPIENT -b -mMESSAGE"
+	echo -e "\t-l List users from wblist"
+	echo -e "\t-d Del from wblist"
+	echo -e "\t-a Add to wblist"
+	echo -e "\t-s Sender (in list mode filter)"
+	echo -e "\t-r Recipient (in list mode filter)"
+	echo -e "\t-m Message for blackisted users"
+	echo -e "\t-b Set blacklist (default whitelist)"
+	exit
+}
+BLACKLIST=0
+ARGS=$(getopt -o ldabs:r:m: -n $(basename $0) -- "$@")
+if [ $? != 0 ] ; then usage >&2 ; exit 1 ; fi
+eval set -- "$ARGS"
+while true ; do
+    case "$1" in
+        -l) 
+		ACTION=list
+		shift;;
+	-a)
+		ACTION=add
+		# ADD
+		shift;;
+	-d)
+		ACTION=del
+		shift;;
+	-s)
+		SENDER=$2
+		shift 2;;
+	-r)
+		RECIPIENT=$2
+		shift 2;;
+	-b)
+		BLACKLIST=1
+		shift;;
+	-m)
+		MESSAGE=$2
+		shift 2;;
+        --) shift ; break ;;
+        *) echo "Internal error!" ; exit 1 ;;
+    esac
+done
+
+test -z "$MESSAGE" && MESSAGE="Rejected by user"
+test -z "$ACTION" && ACTION=list
+
+list(){
+	QUERY="SELECT * FROM wblist"
+	if [ -n "$SENDER" ]; then WS="sender LIKE '%$SENDER%'"; fi
+	if [ -n "$RECIPIENT" ]; then WR="rcpt LIKE '%$RECIPIENT%'"; fi
+	if [ -n "$WS" ]; then 
+		WHERE="WHERE $WS";
+		if [ -n "$WR" ]; then
+			WHERE="$WHERE AND $WR"
+		fi
+	else
+		if [ -n "$WR" ]; then
+			WHERE="WHERE $WR"
+		fi
+	fi
+	if [ -n "$WHERE" ]; then QUERY="$QUERY $WHERE"; fi
+	$MYSQL "$QUERY"
+}
+add(){
+	if [ -z "$SENDER" ]; then usage; fi
+	if [ -z "$RECIPIENT" ]; then usage; fi
+	LIST=$(list)
+	if [ -z "$LIST" ]; then
+		QUERY="INSERT INTO wblist (sender,rcpt,reject,blacklisted,enabled,created) VALUES ('$SENDER','$RECIPIENT','$MESSAGE',$BLACKLIST,1,NOW())"
+		$MYSQL "$QUERY"
+	else
+		echo "Relation exists"
+		echo "$LIST"
+	fi
+
+}
+del(){
+	if [ -z "$SENDER" ]; then usage; fi
+	if [ -z "$RECIPIENT" ]; then usage; fi
+	LIST=$(list)
+	if [ -n "$LIST" ]; then
+		QUERY="DELETE FROM wblist WHERE sender='$SENDER' AND rcpt='$RECIPIENT'"
+		$MYSQL "$QUERY"
+	else
+		echo "Relation not exists"
+	fi
+}
+case "$ACTION" in
+	list) list;;
+	add) add;;
+	del) del;;
+esac

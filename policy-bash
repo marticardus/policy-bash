@@ -1,0 +1,15 @@
+#!/bin/bash
+while read INPUT; do
+        [[ -z "$INPUT" ]] && break
+        eval $INPUT
+done
+source /etc/policy-bash/policy-conf
+
+if [ -d $POLICIESDIR ]; then
+	if [ -d $POLICIESDIR/$protocol_state ]; then
+		cd $POLICIESDIR/$protocol_state
+		for p in *; do source $p; done
+	fi
+fi
+
+duno

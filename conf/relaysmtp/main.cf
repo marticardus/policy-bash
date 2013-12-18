@@ -1,0 +1,20 @@
+mynetworks = $mysql_mynetworks
+smtpd_recipient_restrictions =
+	...
+	permit_mynetworks,
+	permit_sasl_authenticated,
+	...
+
+
+broken_sasl_auth_clients = yes
+smtpd_sasl_type = dovecot
+smtpd_sasl_path = private/auth
+smtpd_sasl_auth_enable = yes
+smtpd_sasl_local_domain =
+smtpd_sasl_security_options = noanonymous
+smtpd_sasl_authenticated_header = yes
+
+mysql_sender_maps = proxy:mysql:/etc/postfix/mysql_sender_maps.cf
+mysql_mynetworks = proxy:mysql:/etc/postfix/mysql_mynetworks.cf
+proxy_read_maps  = ... $mysql_sender_maps $mysql_mynetworks
+

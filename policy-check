@@ -1,0 +1,30 @@
+#!/bin/bash
+ok(){
+	echo -e "\tOK"
+}
+fail(){
+	echo -e "\tFAIL"
+}
+POLICYCONFDIR=/etc/policy-bash
+POLICYCONF=$POLICYCONFDIR/policy-conf
+
+echo -n "Checking dir $POLICYCONFDIR"
+test -d $POLICYCONFDIR && ok || fail
+
+echo -n "Checking file $POLICYCONF"
+test -e $POLICYCONF && ok || fail 
+
+source $POLICYCONF
+
+echo -ne "Checking policies dir $POLICIESDIR"
+test -d $POLICIESDIR && ok || fail
+
+echo -ne "Checking policy utils dir $POLICYUTILS"
+test -d $POLICYUTILS && ok || fail
+
+echo "Checking mysql client..."
+echo -en "\tbinary"
+which mysql > /dev/null && ok || fail
+echo -en "\tValid connection string"
+$MYSQL "SELECT 1" 2>/dev/null|grep -q 1 && ok || fail
+

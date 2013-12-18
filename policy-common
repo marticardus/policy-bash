@@ -1,0 +1,19 @@
+#!/bin/bash
+accept() { echo "action=OK"; echo ""; }
+ret4() {	RET=$1; shift; echo "action=$RET $@"; echo ""; }
+ret5() { RET=$1; shift; echo "action=$RET $@"; echo ""; }
+reject(){ echo "action=REJECT $@"; echo ""; }
+defer() { echo "action=defer $@"; echo ""; }
+defer_if_reject() { echo "action=defer_if_refect $@"; echo ""; }
+defer_if_permit() { echo "action=defer_if_permit $@"; echo ""; }
+discard() { echo "action=discard $@"; echo ""; }
+dunno(){ echo "action=DUNNO"; echo ""; }
+hold() { echo "action=HOLD $@"; echo ""; }
+warn() { echo "action=WARN $@"; echo ""; }
+
+logging(){
+	PID=$1
+	shift 1
+	MSG=$@
+	logger -t "policy-bash[$PID]" -- $MSG
+}

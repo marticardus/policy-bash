@@ -1,0 +1,6 @@
+user = USER
+password = PASSWD
+hosts = HOST
+dbname = BBDD
+query = SELECT 'relay' FROM relay_networks WHERE (@base := IF(INSTR(network,'.'),32, 128)) AND IF(INSTR(network,'/'), (@ipaddr_start := inet_aton(substring_index(network, '/', 1))) AND (@ipaddr_count := POW(2, @base - substring_index(network, '/', -1))) AND (@ipaddr_end := @ipaddr_start + @ipaddr_count - 1), (@ipaddr_start := inet_aton(network)) AND (@ipaddr_end := @ipaddr_start)) AND @ipaddr_start <= inet_aton('%s') AND inet_aton('%s') <= @ipaddr_end ORDER BY (@ipaddr_end - @ipaddr_start) AND active=1 ASC LIMIT 1;
+
