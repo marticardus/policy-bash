@@ -8,7 +8,13 @@ source /etc/policy-bash/policy-conf
 if [ -d $POLICIESDIR ]; then
 	if [ -d $POLICIESDIR/$protocol_state ]; then
 		cd $POLICIESDIR/$protocol_state
-		for p in *; do if [ -f $p ]; then source $p; fi; done
+		for p in *.sh; do 
+			if [ -f $p ]; then 
+				POLICYNAME=$(basename $p .sh)
+				logging "${protocol_state}/${POLICYNAME}" "Executing $POLICYNAME in smtp state $protocol_state"
+				source $p; 
+			fi; 
+		done
 	fi
 fi
 
