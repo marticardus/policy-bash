@@ -1,6 +1,6 @@
 DOMAIN=$(echo $recipient|cut -d@ -f2)
 BLISTUSER=$($MYSQL "SELECT reject FROM wblist WHERE sender='$sender' AND rcpt='$recipient' AND blacklisted=1 AND enabled=1"|grep -v reject)
-BLISTDOM=$($MYSQL "SELECT reject FROM wblist WHERE sender='$sender' AND rcpt='$DOMAIN' AND blacklisted=1 AND enabled=1)"|grep -v reject)
+BLISTDOM=$($MYSQL "SELECT reject FROM wblist WHERE sender='$sender' AND rcpt='$DOMAIN' AND blacklisted=1 AND enabled=1"|grep -v reject)
 BLISTALL=$($MYSQL "SELECT reject FROM wblist WHERE sender='$sender' AND rcpt='ALL' AND blacklisted=1 AND enabled=1"|grep -v reject)
 
 

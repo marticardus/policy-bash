@@ -14,6 +14,7 @@ policyreturn(){
 	debug "Return action $ACTION"
 	echo "action=$ACTION $@"
 	echo "";
+	exit 0
 }
 accept(){ 
 	policyreturn "OK" 
