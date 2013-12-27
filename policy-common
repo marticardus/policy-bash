@@ -3,9 +3,15 @@ logging(){
 	if [ -z "$POLICYNAME" ]; then POLICYNAME=default; fi
 	logger -t "policy-bash[${protocol_state}/${POLICYNAME}]" -- $@
 }
+debug(){
+	if [ $LOGLEVEL -eq 3 ]; then logging $@; fi
+}
+info(){
+	if [ $LOGLEVEL -ge 2 ]; then logging $@; fi
+}
 policyreturn(){
 	ACTION=$1; shift
-	logging "Return action $ACTION"
+	debug "Return action $ACTION"
 	echo "action=$ACTION $@"
 	echo "";
 }
