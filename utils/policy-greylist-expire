@@ -1,0 +1,12 @@
+#!/bin/bash
+source /etc/policy-bash/policy-conf
+POLICYNAME=greylist
+
+if [ -f $POLICYDIR/policies-conf/$POLICYNAME ] ; then
+        source $POLICYDIR/policies-conf/$POLICYNAME
+else
+	EXPIRE=54000
+fi
+NOW=$(date +%s)
+EXPIRED=$(echo "$NOW - $EXPIRE"|bc)
+pbsql "DELETE FROM greylist WHERE updated>$EXPIRED"
