@@ -34,3 +34,16 @@ CREATE TABLE IF NOT EXISTS `restrictions` (
   `restrictions` varchar(120) NOT NULL,
   PRIMARY KEY (`domain`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+
+CREATE TABLE IF NOT EXISTS `greylist` (
+  `sender` varchar(200) NOT NULL,
+  `recipient` varchar(200) NOT NULL,
+  `host` varchar(15) NOT NULL,
+  `created` int(11) NOT NULL,
+  `updated` int(11) NOT NULL,
+  `count` int(11) NOT NULL,
+  UNIQUE KEY `sender` (`sender`,`recipient`,`host`),
+  KEY `created` (`created`),
+  KEY `updated` (`updated`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
