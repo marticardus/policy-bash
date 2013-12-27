@@ -1,2 +1,0 @@
-policy-common unix - n n - - spawn
-        user=nobody argv=/usr/local/sbin/policy-common
