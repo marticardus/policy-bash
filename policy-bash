@@ -11,8 +11,9 @@ if [ -d $POLICIESDIR ]; then
 		for p in *.sh; do 
 			if [ -f $p ]; then 
 				POLICYNAME=$(basename $p .sh)
-				logging "${protocol_state}/${POLICYNAME}" "Executing $POLICYNAME in smtp state $protocol_state"
+				logging "Executing $POLICYNAME in smtp state $protocol_state"
 				source $p; 
+				POLICYNAME=""
 			fi; 
 		done
 	fi

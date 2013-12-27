@@ -1,19 +1,44 @@
 #!/bin/bash
-accept() { echo "action=OK"; echo ""; }
-ret4() {	RET=$1; shift; echo "action=$RET $@"; echo ""; }
-ret5() { RET=$1; shift; echo "action=$RET $@"; echo ""; }
-reject(){ echo "action=REJECT $@"; echo ""; }
-defer() { echo "action=defer $@"; echo ""; }
-defer_if_reject() { echo "action=defer_if_refect $@"; echo ""; }
-defer_if_permit() { echo "action=defer_if_permit $@"; echo ""; }
-discard() { echo "action=discard $@"; echo ""; }
-dunno(){ echo "action=DUNNO"; echo ""; }
-hold() { echo "action=HOLD $@"; echo ""; }
-warn() { echo "action=WARN $@"; echo ""; }
-
 logging(){
-	PID=$1
-	shift 1
-	MSG=$@
-	logger -t "policy-bash[$PID]" -- $MSG
+	if [ -z "$POLICYNAME" ]; then POLICYNAME=default; fi
+	logger -t "policy-bash[${protocol_state}/${POLICYNAME}]" -- $@
+}
+policyreturn(){
+	ACTION=$1; shift
+	logging "Return action $ACTION"
+	echo "action=$ACTION $@"
+	echo "";
+}
+accept(){ 
+	policyreturn "OK" 
+}
+ret4(){ 
+	RET=$1; shift; policyreturn $RET $@ 
+}
+ret5(){ 
+	RET=$1; shift; policyreturn $RET $@ 
+}
+reject(){ 
+	policyreturn REJECT $@ 
+}
+defer(){ 
+	policyreturn DEFER $@ 
+}
+defer_if_reject(){ 
+	policyreturn defer_if_refect $@ 
+}
+defer_if_permit(){ 
+	policyreturn defer_if_permit $@ 
+}
+discard(){ 
+	policyreturn discard $@ 
+}
+dunno(){ 
+	policyreturn DUNNO 
+}
+hold(){ 
+	policyreturn HOLD $@ 
+}
+warn(){ 
+	policyreturn WARN $@ 
 }
