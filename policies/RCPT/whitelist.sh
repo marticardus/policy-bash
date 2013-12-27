@@ -1,15 +1,15 @@
 DOMAIN=$(echo $recipient|cut -d@ -f2)
-BLISTUSER=$($MYSQL "SELECT 'OK' AS whitelisted FROM wblist WHERE sender='$sender' AND rcpt='$recipient' AND blacklisted!=1 AND enabled=1"|grep -v whitelisted)
-BLISTDOM=$($MYSQL "SELECT 'OK' AS whitelisted FROM wblist WHERE sender='$sender' AND rcpt='$DOMAIN' AND blacklisted!=1 AND enabled=1)"|grep -v whitelisted)
-BLISTALL=$($MYSQL "SELECT 'OK' AS whitelisted FROM wblist WHERE sender='$sender' AND rcpt='ALL' AND blacklisted!=1 AND enabled=1"|grep -v whitelisted)
+BLISTUSER=$(pbsql "SELECT 'OK' AS whitelisted FROM wblist WHERE sender='$sender' AND rcpt='$recipient' AND blacklisted!=1 AND enabled=1")
+BLISTDOM=$(pbsql "SELECT 'OK' AS whitelisted FROM wblist WHERE sender='$sender' AND rcpt='$DOMAIN' AND blacklisted!=1 AND enabled=1)")
+BLISTALL=$(pbsql "SELECT 'OK' AS whitelisted FROM wblist WHERE sender='$sender' AND rcpt='ALL' AND blacklisted!=1 AND enabled=1")
 
 
 DOMAINSENDER=$(echo $sender|cut -d@ -f2)
-BLISTDOMU=$($MYSQL "SELECT 'OK' AS whitelisted FROM wblist WHERE sender='$DOMAINSENDER' AND rcpt='$recipient' AND blacklisted!=1 AND enabled=1"|grep -v whitelisted)
-BLISTDOMDOM=$($MYSQL "SELECT 'OK' AS whitelisted FROM wblist WHERE sender='$DOMAINSENDER' AND rcpt='$DOMAIN' AND blacklisted!=1 AND enabled=1"|grep -v whitelisted)
-BLISTDOMALL=$($MYSQL "SELECT 'OK' AS whitelisted FROM wblist WHERE sender='$DOMAINSENDER' AND rcpt='ALL' AND blacklisted!=1 AND enabled=1"|grep -v whitelisted)
+BLISTDOMU=$(pbsql "SELECT 'OK' AS whitelisted FROM wblist WHERE sender='$DOMAINSENDER' AND rcpt='$recipient' AND blacklisted!=1 AND enabled=1")
+BLISTDOMDOM=$(pbsql "SELECT 'OK' AS whitelisted FROM wblist WHERE sender='$DOMAINSENDER' AND rcpt='$DOMAIN' AND blacklisted!=1 AND enabled=1")
+BLISTDOMALL=$(pbsql "SELECT 'OK' AS whitelisted FROM wblist WHERE sender='$DOMAINSENDER' AND rcpt='ALL' AND blacklisted!=1 AND enabled=1")
 
-BLISTRCPT=$(${MYSQL} "SELECT 'OK' AS whitelisted FROM wblist WHERE sender='ALL' AND rcpt='$recipient' AND blacklisted!=1 AND enabled=1"|grep -v whitelisted)
+BLISTRCPT=$(pbsql "SELECT 'OK' AS whitelisted FROM wblist WHERE sender='ALL' AND rcpt='$recipient' AND blacklisted!=1 AND enabled=1")
 
 if [ -n "$BLISTUSER" ]; then
 	accept

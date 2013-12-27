@@ -9,6 +9,10 @@ debug(){
 info(){
 	if [ $LOGLEVEL -ge 2 ]; then logging $@; fi
 }
+pbsql(){
+	debug "SQL Exec: $@"
+	$MYSQL "$@"
+}
 policyreturn(){
 	ACTION=$1; shift
 	debug "Return action $ACTION"
