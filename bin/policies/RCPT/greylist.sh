@@ -1,11 +1,11 @@
-if [ -f $POLICYDIR/policies-conf/$POLICYNAME ] ; then
-	source $POLICYDIR/policies-conf/$POLICYNAME
+if [ -f $POLICYCONF/policies/$POLICYNAME ] ; then
+	source $POLICYCONF/policies/$POLICYNAME
 else
 	INTERVAL=300
 	NETMASK=3
 fi
 NOW=$(date +%s)
-HOST=$(echo $client_address|cut -d. -f$NETMASK)
+HOST=$(echo $client_address|cut -d. -f1-$NETMASK)
 TIME=$(pbsql "SELECT created FROM greylist WHERE sender='$sender' AND recipient='$recipient' AND host='$HOST'")
 
 if [ -z "$TIME" ]; then
