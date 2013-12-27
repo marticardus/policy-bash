@@ -8,8 +8,8 @@ source /etc/policy-bash/policy-conf
 if [ -d $POLICIESDIR ]; then
 	if [ -d $POLICIESDIR/$protocol_state ]; then
 		cd $POLICIESDIR/$protocol_state
-		for p in *; do source $p; done
+		for p in *; do if [ -f $p ]; then source $p; fi; done
 	fi
 fi
 
-duno
+dunno
