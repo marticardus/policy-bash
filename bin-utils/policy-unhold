@@ -1,13 +1,20 @@
 #!/bin/bash
 source /etc/policy-bash/policy-conf
-EXPIRE=3600
+POLICYNAME=hold
+
+if [ -f $POLICYDIR/policies-conf/$POLICYNAME ] ; then
+        source $POLICYDIR/policies-conf/$POLICYNAME
+else
+        REFRESH=3600
+fi
+
 NOW=$(date +%s)
 SENDERS=$(pbsql "SELECT sender FROM holdmails GROUP BY sender")
-NEWREFRESH=$(echo "$NOW + $EXPIRE"|bc)
+NEWREFRESH=$(echo "$NOW + $REFRESH"|bc)
 
 for SENDER in $SENDERS; do
-	REFRESH=$(pbsql "SELECT refresh FROM holdretries WHERE sender='$SENDER'")
-	if [ $NOW -lt $REFRESH ]; then
+	UREFRESH=$(pbsql "SELECT refresh FROM holdretries WHERE sender='$SENDER'")
+	if [ $NOW -lt $UREFRESH ]; then
 		pbsql "UPDATE holdretries SET count=0,refresh=$NEWREFRESH WHERE sender='$SENDER'"
 		QUEUE_IDS=$(pbsql "SELECT queue_id FROM holdmails WHERE sender='$SENDER' ORDER BY created ASC LIMIT 2")
 		for QUEUE_ID in $QUEUE_IDS; do
