@@ -1,15 +1,21 @@
-SENDERS=$($MYPFLOG "SELECT sender FROM holdmails GROUP BY sender")
+#!/bin/bash
+source /etc/policy-bash/policy-conf
+EXPIRE=3600
+NOW=$(date +%s)
+SENDERS=$(pbsql "SELECT sender FROM holdmails GROUP BY sender")
+NEWREFRESH=$(echo "$NOW + $EXPIRE"|bc)
 
 for SENDER in $SENDERS; do
-	echo "Sender-> $SENDER"
-	$MYPFLOG "UPDATE holdretries SET retries=0 WHERE sender='$SENDER'"
-	QUEUE_IDS=$($MYPFLOG "SELECT queue_id FROM holdmails WHERE sender='$SENDER' LIMIT 2")
-	for QUEUE_ID in $QUEUE_IDS; do
-		echo "Queue_id -> $QUEUE_ID"
-		/usr/sbin/postsuper -H $QUEUE_ID
-		/usr/sbin/postqueue -i $QUEUE_ID
-		$MYPFLOG "DELETE FROM holdmails WHERE queue_id='$QUEUE_ID'"
-		$MYPFLOG "UPDATE holdretries SET retries=retries+1 WHERE sender='$SENDER'"
-	done
+	REFRESH=$(pbsql "SELECT refresh FROM holdretries WHERE sender='$SENDER'")
+	if [ $NOW -lt $REFRESH ]; then
+		pbsql "UPDATE holdretries SET count=0,refresh=$NEWREFRESH WHERE sender='$SENDER'"
+		QUEUE_IDS=$(pbsql "SELECT queue_id FROM holdmails WHERE sender='$SENDER' ORDER BY created ASC LIMIT 2")
+		for QUEUE_ID in $QUEUE_IDS; do
+			/usr/sbin/postsuper -H $QUEUE_ID
+			/usr/sbin/postqueue -i $QUEUE_ID
+			pbsql "DELETE FROM holdmails WHERE queue_id='$QUEUE_ID'"
+			pbsql "UPDATE holdretries SET count=count+1 WHERE sender='$SENDER'"
+		done	
+	fi
 done
 

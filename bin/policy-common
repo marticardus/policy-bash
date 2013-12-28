@@ -1,7 +1,12 @@
 #!/bin/bash
 logging(){
-	if [ -z "$POLICYNAME" ]; then POLICYNAME=default; fi
-	logger -t "policy-bash[${protocol_state}/${POLICYNAME}]" -- $@
+	if [ -z "$protocol_state" ]; then
+		PROC=$(basename $0 .sh)
+	else
+		if [ -z "$POLICYNAME" ]; then POLICYNAME=default; fi
+		PROC=$protocol_state/$POLICYNAME
+	fi
+	logger -t "policy-bash[$PROC]" -- $@
 }
 debug(){
 	if [ $LOGLEVEL -eq 3 ]; then logging $@; fi

@@ -1,23 +1,24 @@
 ## SELECT IF(count(*)>0,IF(retries<maxsends,'DUNNO','HOLD'),'DUNNO') FROM holdretries WHERE sender='test@acs.li'
-# DEFAULT MAX SENDS
-MAX=2
-
-QUERY_NUM_RETRYS="SELECT retries FROM holdretries WHERE sender='$sender'"
-UPDATE_RETRYS="UPDATE holdretries SET retries=retries+1 WHERE sender='$sender'"
-INSERT_RETRY="INSERT INTO holdretries VALUES ('$sender',1,$MAX)"
-INSERT_QUEUE="INSERT INTO holdmails VALUES ('$queue_id','$sender',NOW())"
-
-RETRYS=$($MYPFLOG "$QUERY_NUM_RETRYS")
-if  [ -z "$RETRYS" ]; then
-	$MYPFLOG "$INSERT_RETRY" >> /tmp/policy.log
-	echo "action=DUNNO"
-	echo ""
-elif [ "$RETRYS" -gt 2 ]; then
-	$MYPFLOG "$INSERT_QUEUE" >> /tmp/policy.log
-	echo "action=HOLD"
-	echo ""
+if [ -f $POLICYCONF/policies/$POLICYNAME ] ; then
+        source $POLICYCONF/policies/$POLICYNAME
 else
-	$MYPFLOG "$UPDATE_RETRYS" >> /tmp/policy.log
-	echo "action=DUNNO"
-	echo ""
+	MAX=10
+	REFRESH=3600
+fi
+NOW=$(date +%s)
+REFRESH=$(echo "$NOW + $REFRESH"|bc)
+
+RETRIES=$(pbsql "SELECT count FROM holdretries WHERE sender='$sender'")
+if [ -z "$RETRIES" ]; then
+	pbsql "INSERT INTO holdretries (sender,count,max,refresh) VALUES ('$sender',1,$MAX,$REFRESH)"
+	dunno
+else
+	MAXUSER=$(pbsql "SELECT max FROM holdretries WHERE sender='$sender'")
+	if [ $RETRIES -ge $MAXUSER ]; then
+		pbsql "INSERT INTO holdmails (queue_id,sender,created) VALUES ('$queue_id','$sender',$NOW)"
+		hold
+	else
+		pbsql "UPDATE holdretries SET count=count+1 WHERE sender='$sender'"
+		dunno
+	fi
 fi
